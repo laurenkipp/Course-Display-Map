@@ -1,0 +1,126 @@
+body {
+    font-family: sans-serif;
+    background-color: #FEEEEE;
+}
+
+#filteroptions {
+  margin-top: 10px;
+}
+
+#drop{
+            border:4px dashed #60121A;
+            -moz-border-radius:5px;
+            -webkit-border-radius:5px;
+            border-radius:5px;
+            padding:25px;
+            text-align:center;
+            font:20pt bold,"Vollkorn";color:green;
+            background-color: #8AB880;
+
+        }
+
+        header {
+          background-color: #60121A;
+          padding: 10px;
+          text-align: center;
+        }
+
+#warning {
+        opacity: 0.3;
+      }
+#b64data{
+            width:100%;
+        }
+
+select {
+            max-width: 100px;
+            margin: 4px;
+        }
+table {
+            border: 2px solid #60121A;
+            border-collapse: collapse;
+            color: #60121A;
+        }
+table > caption {
+            font-size: 150%;
+            background-color: #FFBDBD;
+            border: 2px solid #60121A;
+            border-collapse: collapse;
+            border-bottom-style: none;
+      }
+td, tr {
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid #60121A;
+        }
+
+tr:nth-child(even) {
+            background-color: #FFBDBD;
+        }
+#filtersForm, #out, #currentFilters {
+            max-width: 50%;
+        }
+#calendar {
+    float: right;
+    max-width: 50%;
+    }
+
+/*tr:nth-child(odd){
+    background-color: #ffa31a;
+    background-color: black;
+}*/
+
+a {
+    text-decoration: none;
+    margin-right: 8px;
+}
+a:hover {
+    text-decoration: underline;
+}
+a:visited {
+    color: red;
+}
+
+.select-box {
+display: inline;
+width: 30em;
+font-size: 12px;
+color: #60666d;
+background-color: #ffffff;
+
+@media (min-width: 768px) {
+  width: 70%;
+}
+
+@media (min-width: 992px) {
+  width: 50%;
+}
+
+@media (min-width: 1200px) {
+  width: 30%;
+}
+
+}
+.button {
+  background-color: #EDAD40;
+  transition-duration: 0.2s;
+  border: none;
+  color: black;
+  border-radius: 8px;
+  padding: 6px 12px;
+  text-align: center;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+.button:hover {
+  background-color: #d28c14; /* Green */
+  color: black;
+}
+.button:active {
+  background-color: #d28c14; /* Green */
+  color: White;
+}

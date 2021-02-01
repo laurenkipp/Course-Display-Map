@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<!-- xlsx.js (C) 2013-present  SheetJS http://sheetjs.com -->
+<!-- vim: set ts=2: -->
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Course Display Map</title>
+        <link rel="stylesheet" type="text/css" href="prototype.css"/>
+    </head>
+    <body>
+      <header>
+        <img src="resources/MsideLogo2.png" alt="Morningside Logo" height="50%" width="50%">
+      </header>
+
+        <div id="drop">
+          <img src="resources/xlogo.png" alt="Xlogo" height="5%" width="5%"> <br>
+          Drop Spreadsheet Here <br>
+          <input type="file" name="xlfile" id="xlf" />
+        </div>
+
+
+        <div id="filteroptions">
+          <form id="filtersFormButtons">
+              <input type="button" class="button" id="clearBtn" value="CLEAR all filters" />
+              <input type="button" class="button" id="applyBtn" value="Add Selected Filters" />
+          </form>
+          <form id="filtersForm">
+          </form>
+        </div>
+          <p id="warning"> THE GENERAL ED FILTERS' SCRIPTS HAVEN'T BEEN UPDATED SINCE THIS IS JUST A PROTOTYPE.
+          </p>
+
+        <div id="currentFilters"></div>
+        <br />
+        <table id="calendar">
+          <caption>Calendar</caption>
+
+            <tr><th>Time</th><td>MON</td><td>TUE</td><td>WED</td><td>THUR</td><td>FRI</td></tr>
+            <tr><td id="hourCol"></td><td id="monCol"></td><td id="tueCol"></td><td id="wedCol"></td><td id="thurCol"></td><td id="friCol"></td></tr>
+            <tr><td id="HOURCol6Hour">6:00</td><td id="monCol6Hour"></td><td id="tueCol6Hour"></td><td id="wedCol6Hour"></td><td id="thurCol6Hour"></td><td id="friCol6Hour"></td></tr>
+            <tr><td id="HOURCol7Hour">7:00</td><td id="monCol7Hour"></td><td id="tueCol7Hour"></td><td id="wedCol7Hour"></td><td id="thurCol7Hour"></td><td id="friCol7Hour"></td></tr>
+            <tr><td id="HOURCol8Hour">8:00</td><td id="monCol8Hour"></td><td id="tueCol8Hour"></td><td id="wedCol8Hour"></td><td id="thurCol8Hour"></td><td id="friCol8Hour"></td></tr>
+            <tr><td id="HOURCol9Hour">9:00</td><td id="monCol9Hour"></td><td id="tueCol9Hour"></td><td id="wedCol9Hour"></td><td id="thurCol9Hour"></td><td id="friCol9Hour"></td></tr>
+            <tr><td id="HOURCol10Hour">10:00</td><td id="monCol10Hour"></td><td id="tueCol10Hour"></td><td id="wedCol10Hour"></td><td id="thurCol10Hour"></td><td id="friCol10Hour"></td></tr>
+            <tr><td id="HOURCol11Hour">11:00</td><td id="monCol11Hour"></td><td id="tueCol11Hour"></td><td id="wedCol11Hour"></td><td id="thurCol11Hour"></td><td id="friCol11Hour"></td></tr>
+            <tr><td id="HOURCol12Hour">12:00</td><td id="monCol12Hour"></td><td id="tueCol12Hour"></td><td id="wedCol12Hour"></td><td id="thurCol12Hour"></td><td id="friCol12Hour"></td></tr>
+            <tr><td id="HOURCol13Hour">13:00</td><td id="monCol13Hour"></td><td id="tueCol13Hour"></td><td id="wedCol13Hour"></td><td id="thurCol13Hour"></td><td id="friCol13Hour"></td></tr>
+            <tr><td id="HOURCol14Hour">14:00</td><td id="monCol14Hour"></td><td id="tueCol14Hour"></td><td id="wedCol14Hour"></td><td id="thurCol14Hour"></td><td id="friCol14Hour"></td></tr>
+            <tr><td id="HOURCol15Hour">15:00</td><td id="monCol15Hour"></td><td id="tueCol15Hour"></td><td id="wedCol15Hour"></td><td id="thurCol15Hour"></td><td id="friCol15Hour"></td></tr>
+            <tr><td id="HOURCol16Hour">16:00</td><td id="monCol16Hour"></td><td id="tueCol16Hour"></td><td id="wedCol16Hour"></td><td id="thurCol16Hour"></td><td id="friCol16Hour"></td></tr>
+            <tr><td id="HOURCol17Hour">17:00</td><td id="monCol17Hour"></td><td id="tueCol17Hour"></td><td id="wedCol17Hour"></td><td id="thurCol17Hour"></td><td id="friCol17Hour"></td></tr>
+            <tr><td id="HOURCol18Hour">18:00</td><td id="monCol18Hour"></td><td id="tueCol18Hour"></td><td id="wedCol18Hour"></td><td id="thurCol18Hour"></td><td id="friCol18Hour"></td></tr>
+            <tr><td id="HOURCol19Hour">19:00</td><td id="monCol19Hour"></td><td id="tueCol19Hour"></td><td id="wedCol19Hour"></td><td id="thurCol19Hour"></td><td id="friCol19Hour"></td></tr>
+            <tr><td id="HOURCol20Hour">20:00</td><td id="monCol20Hour"></td><td id="tueCol20Hour"></td><td id="wedCol20Hour"></td><td id="thurCol20Hour"></td><td id="friCol20Hour"></td></tr>
+            <tr><td id="HOURCol21Hour">21:00</td><td id="monCol21Hour"></td><td id="tueCol21Hour"></td><td id="wedCol21Hour"></td><td id="thurCol21Hour"></td><td id="friCol21Hour"></td></tr>
+
+
+        </table>
+        <div id="results"></div>
+
+        <script src="js/js-xlsx/shim.js"></script>
+        <script src="js/taffydb/taffy.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.9.1/xlsx.full.min.js"></script>
+        <script src="flags.json"></script>
+        <script src="js/filters.js"></script>
+        <script>
+         /*jshint browser:true */
+         /*global XLSX */
+         var X = XLSX;
+         var XW = {
+             /* worker message */
+             msg: 'xlsx',
+             /* worker scripts */
+             rABS: './js/js-xlsx/xlsxworker2.js',
+             norABS: './js/js-xlsx/xlsxworker1.js',
+             noxfer: './js/js-xlsx/xlsxworker.js'
+         };
+
+         var rABS = typeof FileReader !== "undefined" && typeof FileReader.prototype !== "undefined" && typeof FileReader.prototype.readAsBinaryString !== "undefined";
+         var use_worker = false;
+
+         var transferable = use_worker;
+
+         var wtf_mode = false;
+
+         function fixdata(data) {
+             var o = "", l = 0, w = 10240;
+             for(; l<data.byteLength/w; ++l) o+=String.fromCharCode.apply(null,new Uint8Array(data.slice(l*w,l*w+w)));
+             o+=String.fromCharCode.apply(null, new Uint8Array(data.slice(l*w)));
+             return o;
+         }
+
+         function ab2str(data) {
+             var o = "", l = 0, w = 10240;
+             for(; l<data.byteLength/w; ++l) o+=String.fromCharCode.apply(null,new Uint16Array(data.slice(l*w,l*w+w)));
+             o+=String.fromCharCode.apply(null, new Uint16Array(data.slice(l*w)));
+             return o;
+         }
+
+         function s2ab(s) {
+             var b = new ArrayBuffer(s.length*2), v = new Uint16Array(b);
+             for (var i=0; i != s.length; ++i) v[i] = s.charCodeAt(i);
+             return [v, b];
+         }
+
+         function xw_noxfer(data, cb) {
+             var worker = new Worker(XW.noxfer);
+             worker.onmessage = function(e) {
+                 switch(e.data.t) {
+                     case 'ready': break;
+                     case 'e': console.error(e.data.d); break;
+                     case XW.msg: cb(JSON.parse(e.data.d)); break;
+                 }
+             };
+             var arr = rABS ? data : btoa(fixdata(data));
+             worker.postMessage({d:arr,b:rABS});
+         }
+
+         function xw_xfer(data, cb) {
+             var worker = new Worker(rABS ? XW.rABS : XW.norABS);
+             worker.onmessage = function(e) {
+                 switch(e.data.t) {
+                     case 'ready': break;
+                     case 'e': console.error(e.data.d); break;
+                     default: xx=ab2str(e.data).replace(/\n/g,"\\n").replace(/\r/g,"\\r"); console.log("done"); cb(JSON.parse(xx)); break;
+                 }
+             };
+             if(rABS) {
+                 var val = s2ab(data);
+                 worker.postMessage(val[1], [val[1]]);
+             } else {
+                 worker.postMessage(data, [data]);
+             }
+         }
+
+         function timestampTo24Hours(ts) {
+             /* Take a timestamp, like 08:00am and return the 24-hour hour portion. */
+             if (ts.search('am') != -1)
+                 meridiem = 0;
+             else
+                 meridiem = 12;
+
+             hour = parseInt(ts.split(':')[0]);
+
+             if (meridiem == 12 && hour < 12)
+                 return hour + 12
+             else if (meridiem == 0 && hour == 12)
+                 return 0
+             else
+                 return hour
+
+         }
+
+         function parseWorkbook(workbook) {
+             var result = [];
+             window.courses = TAFFY();
+             window.sheets = {};
+             workbook.SheetNames.forEach(function(sheetName) {
+                 /* The way the spreadsheet works, lines can sort of
+                    "wrap". The apparent distinction from LABS (which
+                    we have to fill in fields for below) and "wrapped"
+                    lines seems to be the absence of a "O.TIME". TBA
+                    courses have '-' for the time, everyone else has
+                    an actual time, so only wrapped courses are left
+                    and we want to filter those. */
+                 var csv = X.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]).filter(function (record) {return record['O.TIME']});
+                 if(csv.length > 0){
+                     console.info("READING XLS SHEET: " + sheetName);
+                     console.info(csv.length + " RECORDS.");
+
+                     /* Iterate over each row to tidy up the data. */
+                     for (var i = 0; i < csv.length; i++) {
+                         /* Fill in missing fields from previous record. */
+                         if (!csv[i]['COURSE']) {
+                             /* Get field names from last record */
+                             fields = Object.keys(csv[i-1]);
+
+                             /* Import missing fields from last record. */
+                             for (var fieldIdx in fields) {
+                                 fieldName = fields[fieldIdx]
+                                 if (!csv[i][fieldName]) {
+                                     console.debug('Filling in ' + fieldName)
+                                     csv[i][fieldName] = csv[i-1][fieldName];
+                                 }
+                             }
+                             console.debug("Filling in the gaps on record " + i + " = " + csv[i-1]['COURSE']);
+                         }
+
+                         /* Split COURSE (DEPT*341*001) into three columns for easier queries. */
+                         [csv[i]['DEPT'], csv[i]['NUMBER'], csv[i]['SECT']] = csv[i]["COURSE"].split("*");
+
+                         /* Split course time into STARTTIME and ENDTIME for easier queries. */
+                         if (csv[i]["O.TIME"] && csv[i]["O.TIME"] != undefined && csv[i]["O.TIME"] != "-") {
+                             [csv[i]['STARTTIME'], csv[i]['ENDTIME']] = csv[i]["O.TIME"].split("-");
+                             csv[i]['STARTHOUR'] = String(timestampTo24Hours(csv[i]['STARTTIME']));
+                             if (isNaN(csv[i]['STARTHOUR']))
+                                 console.warn(csv[i]['O.TIME']);
+                         } else {
+                             [csv[i]['STARTTIME'], csv[i]['ENDTIME']] = [undefined, undefined];
+                             csv[i]['STARTHOUR'] = undefined;
+                         }
+
+                         /* Work out flag column(s) */
+                         for (var flag in flags) {
+                             courseID = csv[i]['DEPT'] + "-" + csv[i]['NUMBER'];
+                             if (-1 < flags[flag].indexOf(courseID)) {
+                                 csv[i][flag] = "true";
+                                 console.debug("Flags: " + courseID + " has " + flag)
+                             } else {
+                                 csv[i][flag] = "false";
+                             }
+                         }
+
+                     }
+
+                     /* Fold in this worksheet data into the
+                     window.courses TAFFY() database. */
+                     window.courses.merge(csv);
+
+                     window.csv = csv;
+                 }
+             });
+
+             /* All done parsing, lets draw the filter controls. */
+             showFilterControls();
+             return result.join("\n");
+         }
+
+         function showFilterControls() {
+             /*
+              * grab the first element off the TAFFY
+              * database, iterate its keys (excluding
+              * privates named by '__xx') and show the
+              * distinct * list as a control panel. Cool.
+              */
+             output = document.getElementById('filtersForm');
+
+             output.innerHTML = "";
+
+             Object.keys(window.courses().first()).filter(function(v) {return !v.startsWith("_");}).forEach(function(k) {
+                 /* For each header `k`, do the following: */
+                 console.info("Generating filter control for " + k);
+                 selectbox = document.createElement("select");
+                 selectbox.id = k;
+                 selectbox.classList.add("select-box");
+                 newoption = document.createElement("option");
+                 newoption.text = k;
+                 selectbox.add(newoption);
+
+                 window.courses().distinct(k).filter(function(x){return x != undefined}).sort().map(function (record,recordnumber) {
+                     console.debug("Creating option for" + record);
+                     newoption = document.createElement("option");
+                     newoption.text = record;
+                     selectbox.add(newoption);
+
+                 });
+
+                 output.appendChild(selectbox);
+
+
+             });
+         }
+
+         function filterKeys() {
+             /* Return an array of the filter keys
+                (DEPT, TERM, etc) that we know about. */
+             return Object.keys(window.courses().first()).filter(function(k){return !k.startsWith("_")});
+         }
+
+         applyBtn = document.getElementById("applyBtn");
+         function applyFilters() {
+
+             /*
+              * Read in the filters control panel
+              */
+
+             console.log("Applying them filters.");
+             /* Build the list of filters by iterating over the
+             filterKeys() to check each dynamic DropDown Box. */
+             filterKeys().map(function(k) {
+                 console.log(k);
+                 filterSelect = document.getElementById(k);
+                 selectedValue = filterSelect.options[filterSelect.selectedIndex].text;
+                 if (selectedValue != k) { /* k would be TERM, or
+                                            * COURSE, or whatever default value , we skip those. */
+                     window.filters.addFilter(k, selectedValue);
+
+                     /* Reset dropdown box */
+                     filterSelect.selectedIndex = 0;
+                     console.log("Filter on: " + k + "=" + selectedValue);
+                 }
+             });
+
+             console.log("Filtered to " + window.courses(window.filters.generateQuery()).count());
+
+             /*
+              * Apply filters from the window.filters Object
+              */
+
+             /* Show results. (Stat Table) */
+             document.getElementById('results').innerHTML = '<table border="1">' +
+                                                            window.courses(window.filters.generateQuery()).supplant("<tr><td>{TERM}</td><td>{COURSE}</td><td>{STARTTIME}-{ENDTIME}</td><td>{O.DAY}</td></tr>") +
+                                                            "</table>";
+
+             /* Show results. (Graphic calendar table) By iterating
+             over each record and placing it into the correct table
+                cell. */
+             clearCalendarTable();
+             window.courses(window.filters.generateQuery()).map(function (record, result) {
+
+                 /* Skip undefined days */
+                 days = record["O.DAY"];
+                 if (days == "TBA" || days == undefined) {
+                     return;
+                 }
+
+                 starthour = record["STARTHOUR"]
+
+                 /* Process MTWThF */
+                 days = days.replace('TH', 'H');
+
+                 dayMap = {'M': 'monCol', 'T': 'tueCol', 'W': 'wedCol', 'H': 'thurCol', 'F': 'friCol'};
+                 for (var i = 0, len = days.length; i < len; i++) {
+                     /* Try to put the course in a given hour row,
+                     otherwise put it on the generic top-of-list
+                     row. */
+                     var cellId = dayMap[days[i]] + starthour + "Hour";
+                     if (!cellId) {
+                         var cellId = dayMap[days[i]];
+                     }
+
+                     cellObj = document.getElementById(cellId);
+                     if (!cellObj) {
+                         console.warn("Missing cell obj for " + cellId);
+                     } else {
+                         cellObj.innerHTML += record['COURSE'] + "<br/>";
+                     }
+
+                 }
+                 document.getElementById(dayMap[days]);
+             });
+
+             displayCurrentFilters();
+
+         }
+         applyBtn.addEventListener('click', applyFilters, false);
+
+         function clearFilters() {
+             /* Clear list of applied filters. */
+             window.filters.clearFilters();
+             clearCalendarTable();
+             displayCurrentFilters();
+             console.info('Filters cleared.');
+
+         }
+         document.getElementById("clearBtn").addEventListener('click', clearFilters, false);
+
+         function clearCalendarTable() {
+             dayMap = {'M': 'monCol', 'T': 'tueCol', 'W': 'wedCol', 'H': 'thurCol', 'F': 'friCol'};
+             week = 'MTWHF';
+             earliestHour = 6;
+             latestHour   = 21;
+             for (var day = 0; day < week.length; day++) {
+                 for (var hour = earliestHour; hour <= latestHour; hour++ ) {
+                     var cellId = dayMap[week[day]] + hour + "Hour";
+                     document.getElementById(cellId).innerHTML = "";
+                     console.log("Clearing cell.");
+                 }
+             }
+
+         }
+
+         function displayCurrentFilters() {
+             /* Display current filters (the filters themselves, not the report) */
+             currentFiltersElement = document.getElementById('currentFilters');
+             currentFiltersElement.innerHTML = "Current Filters: (click to remove) <br/>\n";
+             window.filters.listFilters().map(function(f) {
+                 /* listFilters returns [key, val] for each filter. */
+                 [k, v] = f;
+                 filterRemoveLink = document.createElement('a');
+                 filterRemoveLink.appendChild(document.createTextNode("(x) " + k + "=" + v + ""));
+                 filterRemoveLink.href = "#";
+
+                 /* This is a "closure", it is a function which
+                 generates a new function that has 'closed over' the k
+                 and v variables. That new function is added as the
+                 onClick event listener to call deleteFilter(k,v) and
+                 other clean up when a link is clicked. */
+                 var filterRemoveLinkClosure = function(k,v) {
+                     return function () {
+                         console.log("Clearing filter "+k+"="+v);
+
+                         window.filters.deleteFilter(k,v);
+                         applyFilters();
+                         displayCurrentFilters();
+
+                         return false;
+                         }
+                 }
+
+                 filterRemoveLink.addEventListener('click', filterRemoveLinkClosure(k,v), false);
+
+                 currentFiltersElement.appendChild(filterRemoveLink);
+
+             });
+         }
+
+         var drop = document.getElementById('drop');
+         function handleDrop(e) {
+             console.info('handleDrop');
+             e.stopPropagation();
+             e.preventDefault();
+             // rABS = document.getElementsByName("userabs")[0].checked;
+             // use_worker = document.getElementsByName("useworker")[0].checked;
+             var files = e.dataTransfer.files;
+             var f = files[0];
+             var reader = new FileReader();
+             var name = f.name;
+             reader.onload = function(e) {
+                 if(typeof console !== 'undefined') console.log("onload", new Date(), rABS, use_worker);
+                 var data = e.target.result;
+
+                 var wb;
+                 if(rABS) {
+                     console.log('rABS = true');
+                     wb = X.read(data, {type: 'binary'});
+                 } else {
+                     console.log('rABS = false');
+                     var arr = fixdata(data);
+                     wb = X.read(btoa(arr), {type: 'base64'});
+                 }
+
+                 parseWorkbook(wb);
+
+             };
+             if(rABS) reader.readAsBinaryString(f);
+             else reader.readAsArrayBuffer(f);
+         }
+
+         function handleDragover(e) {
+             e.stopPropagation();
+             e.preventDefault();
+             e.dataTransfer.dropEffect = 'copy';
+         }
+
+         if(drop.addEventListener) {
+             drop.addEventListener('dragenter', handleDragover, false);
+             drop.addEventListener('dragover', handleDragover, false);
+             drop.addEventListener('drop', handleDrop, false);
+         }
+
+         window.onload = function() {
+             /* Perform any necessary initialization of resources. */
+             window.courses = TAFFY();
+             clearFilters();
+             applyFilters();
+         }
+
+        </script>
+    </body>
+</html>
